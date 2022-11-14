@@ -8,6 +8,24 @@ static const int SCRSIZE = 50;
 typedef struct { float x, y, z; } vec3;
 typedef struct { float x, y; } vec2;
 
+#define ROTX(a) { \
+    { 1.f, 0.f, 0.f }, \
+    { 0.f, cosf(a), -sinf(a) }, \
+    { 0.f, sinf(a), cosf(a) } \
+}
+
+#define ROTY(a) { \
+    { cosf(a), 0.f, sinf(a) }, \
+    { 0.f, 1.f, 0.f }, \
+    { -sinf(a), 0.f, cosf(a) } \
+}
+
+#define ROTZ(a) { \
+    { cosf(a), -sinf(a), 0.f }, \
+    { sinf(a), cosf(a), 0.f }, \
+    { 0.f, 0.f, 1.f } \
+}
+
 vec3 vec3_add(vec3 a, vec3 b)
 {
     return (vec3){ a.x + b.x, a.y + b.y, a.z + b.z };
@@ -55,40 +73,20 @@ int main()
     {
         erase();
 
-        float roty[3][3] = {
-            { cosf(angle.y), 0.f, sinf(angle.y) },
-            { 0.f, 1.f, 0.f },
-            { -sinf(angle.y), 0.f, cosf(angle.y) }
-        };
-        float rotx[3][3] = {
-            { 1.f, 0.f, 0.f },
-            { 0.f, cosf(angle.x), -sinf(angle.x) },
-            { 0.f, sinf(angle.x), cosf(angle.x) }
-        };
-        float rotz[3][3] = {
-            { cosf(angle.z), -sinf(angle.z), 0.f },
-            { sinf(angle.z), cosf(angle.z), 0.f },
-            { 0.f, 0.f, 1.f }
-        };
+        float rotx[3][3] = ROTX(angle.x);
+        float roty[3][3] = ROTY(angle.y);
+        float rotz[3][3] = ROTZ(angle.z);
 
         // Assume donut standing upright with camera looking through hole
         for (float theta = 0.f; theta < 2.f * M_PI; theta += tstep)
         {
             // Z rot
-            float trot[3][3] = {
-                { cosf(theta), -sinf(theta), 0.f },
-                { sinf(theta), cosf(theta), 0.f },
-                { 0.f, 0.f, 1.f }
-            };
+            float trot[3][3] = ROTZ(theta);
 
             for (float phi = 0.f; phi < 2.f * M_PI; phi += pstep)
             {
                 // X rot
-                float prot[3][3] = {
-                    { 1.f, 0.f, 0.f },
-                    { 0.f, cosf(phi), -sinf(phi) },
-                    { 0.f, sinf(phi), cosf(phi) }
-                };
+                float prot[3][3] = ROTX(phi);
 
                 // Rotate along inner ring
                 vec3 ring_center = center;
